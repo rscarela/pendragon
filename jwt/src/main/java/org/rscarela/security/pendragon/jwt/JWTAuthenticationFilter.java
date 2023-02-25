@@ -16,6 +16,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 
+/**
+ * JWT Filter responsible for protecting the authentication endpoint.
+ *
+ * It parses the credentials provided in the request to a valid instance
+ * of UserCredentials and run the authentication process against them.
+ *
+ * @see JWTTokenProvider
+ * @see UserCredentials
+ *
+ * @since 1.0.0
+ * @author Renan Scarela
+ */
 public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private JWTTokenProvider tokenAuthenticationService;

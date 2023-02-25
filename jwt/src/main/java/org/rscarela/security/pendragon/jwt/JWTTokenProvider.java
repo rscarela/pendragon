@@ -13,6 +13,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ * Provider responsible for orchestrating the JWT based authentication.
+ *
+ * This class is accountable for both generating the JWT token during authentication
+ * and parsing an existing JWT for already authenticated users.
+ *
+ * It also carries all required configurations for the JWT to work, such as secret,
+ * expiration time, header prefix and header name.
+ *
+ * @see AuthenticatedUserProvider
+ *
+ * @since 1.0.0
+ * @author Renan Scarela
+ */
+
 @Named
 public class JWTTokenProvider {
 
@@ -35,6 +50,13 @@ public class JWTTokenProvider {
         this.headerName = headerName;
     }
 
+    /**
+     * Invoked during authentication, generates the JWT token and add it
+     * to the request response.
+     *
+     * @param response - current HttpServletResponse
+     * @param username - Username that identifies the user that is authenticating
+     */
     public void addAuthentication(HttpServletResponse response, String username) {
         String JWT = Jwts.builder()
                 .setSubject(username)
@@ -45,6 +67,17 @@ public class JWTTokenProvider {
         response.addHeader(headerName, headerPrefix + " " + JWT);
     }
 
+    /**
+     * Load an Authentication instance for the provided JWT Token.
+     *
+     * Token will be parsed to retrieve its unique identifier. Afterwards,
+     * existing AuthenticationUserProvider will be invoked to retrieve the
+     * entity for the authenticated user, and will use it to instantiate the
+     * authentication.
+     *
+     * @param request - current HttpServletRequest
+     * @return UserAuthentication parsed from current JWT token
+     */
     public Authentication getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(headerName);
 
@@ -59,6 +92,15 @@ public class JWTTokenProvider {
         return user.isEmpty() ? null : new UserAuthentication(user.get());
     }
 
+    /**
+     * Parses the Authorization header to retrieve the JWT token content.
+     *
+     * If already expired or malformed, null is returned and a 403 status
+     * will be raised.
+     *
+     * @param token
+     * @return current JWT content
+     */
     private String getParsedUuid(String token) {
         try {
             return Jwts.parser()

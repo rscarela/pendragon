@@ -11,6 +11,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+/**
+ *
+ * Spring filter responsible for loading the current JWT authentication from SecurityContext.
+ *
+ * @see JWTTokenProvider
+ *
+ * @since 1.0.0
+ * @author Renan Scarela
+ */
 public class JWTFilter extends GenericFilterBean {
 
     private JWTTokenProvider tokenAuthenticationService;

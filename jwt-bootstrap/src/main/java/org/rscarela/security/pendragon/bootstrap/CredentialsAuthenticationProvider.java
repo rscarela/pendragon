@@ -12,6 +12,20 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Optional;
 
+/**
+ * Authentication provider based on user's username and password.
+ *
+ * This is the default behavior for extracting the UserAuthentication
+ * based on Spring Security Context, by using the AuthenticatedUserProvider
+ * implementation provided by the application domain.
+ *
+ * @see AuthenticatedUserProvider
+ * @see AuthenticatedUser
+ * @see UserAuthentication
+ *
+ * @since 1.0.0
+ * @author Renan Scarela
+ */
 @Named
 public class CredentialsAuthenticationProvider implements AuthenticationProvider {
 

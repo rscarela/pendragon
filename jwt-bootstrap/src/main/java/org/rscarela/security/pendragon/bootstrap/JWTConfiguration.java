@@ -16,6 +16,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.inject.Inject;
 
+/**
+ * This class is the configuration to be imported in a
+ * Spring Boot application to have the JWT authentication
+ * working.
+ *
+ * It's responsible for configuring HttpSecurity, by defining
+ * all required filters, authentication endpoints and provided
+ * permits and denies.
+ *
+ * @see CredentialsAuthenticationProvider
+ * @see JWTTokenProvider
+ * @see CredentialsTypeProvider
+ * @see URIConfigurations
+ */
 @Configuration
 @ComponentScan(basePackages = {"org.rscarela.security.pendragon.*"})
 public class JWTConfiguration extends WebSecurityConfigurerAdapter {

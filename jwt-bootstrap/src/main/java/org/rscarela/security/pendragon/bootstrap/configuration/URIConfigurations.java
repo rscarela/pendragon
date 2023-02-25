@@ -12,13 +12,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Class responsible for receiving, parsing and mapping
+ * URLs rules that will be enforced by the application,
+ * adding permit and deny rules based on application
+ * properties.
+ *
+ * The following items can be configured:
+ * * signUp - URI used for the creating users
+ * * signIn - URI used for authenticating
+ * * permit - All URIs that must permit access with no authentication
+ * * deny - All URIs that will be blocked
+ *
+ * @since 1.0.0
+ * @author Renan Scarela
+ */
 @Named
 public class URIConfigurations {
 
     private final Map<HttpMethod, String[]> mappedPermittedURIs;
     private final Map<HttpMethod, String[]> mappedDeniedURIs;
-
-    private final String signUpURI;
     private final String signInURI;
 
     @Inject
@@ -27,7 +40,6 @@ public class URIConfigurations {
             @Value("${pendragon.filter.uri.signIn}") String signInURI,
             @Value("${pendragon.filter.uri.permit:[]}") List<String> permittedURIs,
             @Value("${pendragon.filter.uri.deny:[]}") List<String> deniedURIs) {
-        this.signUpURI = signUpURI;
         this.signInURI = signInURI;
         this.mappedPermittedURIs = new HashMap<>();
         this.mappedDeniedURIs = new HashMap<>();
