@@ -5,13 +5,17 @@ import org.rscarela.security.pendragon.jwt.JWTAuthenticationFilter;
 import org.rscarela.security.pendragon.jwt.JWTFilter;
 import org.rscarela.security.pendragon.jwt.JWTTokenProvider;
 import org.rscarela.security.pendragon.jwt.credentials.CredentialsTypeProvider;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.inject.Inject;
@@ -32,26 +36,25 @@ import javax.inject.Inject;
  */
 @Configuration
 @ComponentScan(basePackages = {"org.rscarela.security.pendragon.*"})
-public class JWTConfiguration extends WebSecurityConfigurerAdapter {
+public class JWTConfiguration {
 
-    private final CredentialsAuthenticationProvider credentialsAuthenticationProvider;
     private final JWTTokenProvider tokenAuthenticationService;
     private final CredentialsTypeProvider credentialsTypeProvider;
     private final URIConfigurations uriConfigurations;
 
     @Inject
-    public JWTConfiguration(CredentialsAuthenticationProvider credentialsAuthenticationProvider,
-                            JWTTokenProvider tokenAuthenticationService,
+    public JWTConfiguration(JWTTokenProvider tokenAuthenticationService,
                             CredentialsTypeProvider credentialsTypeProvider,
                             URIConfigurations uriConfigurations) {
-        this.credentialsAuthenticationProvider = credentialsAuthenticationProvider;
         this.tokenAuthenticationService = tokenAuthenticationService;
         this.credentialsTypeProvider = credentialsTypeProvider;
         this.uriConfigurations = uriConfigurations;
     }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
+
         httpSecurity
                 .csrf()
                 .disable();
@@ -67,14 +70,10 @@ public class JWTConfiguration extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-                .addFilterBefore(new JWTAuthenticationFilter(uriConfigurations.getSignInPath(), authenticationManager(), tokenAuthenticationService, credentialsTypeProvider.getCredentialsType()), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTAuthenticationFilter(uriConfigurations.getSignInPath(), authenticationManager, tokenAuthenticationService, credentialsTypeProvider.getCredentialsType()), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTFilter(tokenAuthenticationService), UsernamePasswordAuthenticationFilter.class);
-    }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder
-                .authenticationProvider(credentialsAuthenticationProvider);
+        return httpSecurity.build();
     }
 
 }
