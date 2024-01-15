@@ -10,10 +10,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -56,20 +56,20 @@ public class JWTConfiguration {
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
 
         httpSecurity
-                .csrf()
-                .disable();
+                .csrf(AbstractHttpConfigurer::disable);
 
-        ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = httpSecurity.authorizeRequests();
+        httpSecurity.authorizeHttpRequests(auth -> {
+            for (HttpMethod method : HttpMethod.values()) {
+                auth.requestMatchers(uriConfigurations.getPermittedURIs().get(method)).permitAll();
+                auth.requestMatchers(uriConfigurations.getDeniedURIs().get(method)).denyAll();
+            }
 
-        for (HttpMethod method : HttpMethod.values()) {
-            expressionInterceptUrlRegistry.antMatchers(uriConfigurations.getPermittedURIs().get(method)).permitAll();
-            expressionInterceptUrlRegistry.antMatchers(uriConfigurations.getDeniedURIs().get(method)).denyAll();
-        }
-
-        expressionInterceptUrlRegistry
+            auth
                 .anyRequest()
-                .authenticated()
-                .and()
+                .authenticated();
+        });
+
+        httpSecurity
                 .addFilterBefore(new JWTAuthenticationFilter(uriConfigurations.getSignInPath(), authenticationManager, tokenAuthenticationService, credentialsTypeProvider.getCredentialsType()), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTFilter(tokenAuthenticationService), UsernamePasswordAuthenticationFilter.class);
 
