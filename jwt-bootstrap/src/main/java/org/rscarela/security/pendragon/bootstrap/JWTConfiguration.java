@@ -56,6 +56,9 @@ public class JWTConfiguration {
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
 
         httpSecurity
+                .cors(Customizer.withDefaults());
+
+        httpSecurity
                 .csrf(AbstractHttpConfigurer::disable);
 
         httpSecurity.authorizeHttpRequests(auth -> {
