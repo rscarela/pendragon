@@ -7,7 +7,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,7 +36,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
                                    AuthenticationManager authManager,
                                    JWTTokenProvider tokenAuthenticationService,
                                    Class<? extends UserCredentials> credentialsType) {
-        super(new AntPathRequestMatcher(url));
+        super(url);
         this.tokenAuthenticationService = tokenAuthenticationService;
         this.credentialsType = credentialsType;
         setAuthenticationManager(authManager);

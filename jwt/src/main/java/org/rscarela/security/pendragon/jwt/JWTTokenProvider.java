@@ -6,8 +6,8 @@ import org.rscarela.security.pendragon.jwt.credentials.AuthenticatedUserProvider
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Date;
@@ -50,6 +50,14 @@ public class JWTTokenProvider {
         this.headerName = headerName;
     }
 
+    public String generateToken(String username) {
+        return Jwts.builder()
+            .setSubject(username)
+            .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+            .signWith(SignatureAlgorithm.HS512, secret)
+            .compact();
+    }
+
     /**
      * Invoked during authentication, generates the JWT token and add it
      * to the request response.
@@ -58,11 +66,7 @@ public class JWTTokenProvider {
      * @param username - Username that identifies the user that is authenticating
      */
     public void addAuthentication(HttpServletResponse response, String username) {
-        String JWT = Jwts.builder()
-                .setSubject(username)
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+        String JWT = generateToken(username);
 
         response.addHeader(headerName, headerPrefix + " " + JWT);
     }
